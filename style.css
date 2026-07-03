@@ -876,6 +876,10 @@ button {
     color: #f2ede5
 }
 
+[data-theme="dark"] .feature-panel.dark {
+    color: #151515;
+}
+
 .feature-panel.light {
     background: var(--color-surface);
     box-shadow: var(--shadow-sm)
@@ -917,6 +921,10 @@ button {
     background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .65) 0 18px, transparent 18px 30px);
     transform: rotate(-12deg);
     opacity: .7
+}
+
+[data-theme="dark"] .feature-panel.dark .road-mark {
+    background: repeating-linear-gradient(90deg, rgba(21, 21, 21, .35) 0 18px, transparent 18px 30px);
 }
 
 .wheel-ghost {
