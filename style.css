@@ -614,64 +614,6 @@ button {
     font-size: var(--text-base)
 }
 
-.pedal-meter {
-    display: grid;
-    gap: .7rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, .08)
-}
-
-.pedal-meter-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem
-}
-
-.pedal-meter strong {
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    color: currentColor;
-    opacity: 0.68
-}
-
-.pedal-meter-value {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    color: currentColor
-}
-
-.meter-track {
-    height: .65rem;
-    background: rgba(255, 255, 255, .12);
-    border-radius: 999px;
-    overflow: hidden;
-    position: relative
-}
-
-.meter-fill {
-    height: 100%;
-    width: 72%;
-    background: linear-gradient(90deg, #ec6d35, #f4b085, #f2ede5);
-    border-radius: 999px;
-    position: relative
-}
-
-.meter-fill:after {
-    content: "";
-    position: absolute;
-    right: .35rem;
-    top: 50%;
-    width: .85rem;
-    height: .85rem;
-    border-radius: 50%;
-    border: 2px solid rgba(17, 17, 17, .35);
-    background: #fff;
-    transform: translateY(-50%)
-}
-
 .bike-illustration {
     margin-top: auto;
     align-self: end;
@@ -1107,44 +1049,6 @@ button {
     width: 1.1rem;
     height: 1.1rem;
     color: var(--color-primary)
-}
-
-/* TIRE CURSOR */
-.tire-cursor {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(200, 78, 25, .55);
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    z-index: 90;
-    mix-blend-mode: multiply;
-    transition: opacity .2s ease, transform .08s linear
-}
-
-.tire-cursor:before,
-.tire-cursor:after {
-    content: "";
-    position: absolute;
-    inset: 3px;
-    border-radius: 50%;
-    border: 1px dashed rgba(31, 42, 42, .35)
-}
-
-.tire-cursor:after {
-    inset: 7px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: rgba(200, 78, 25, .35)
-}
-
-[data-theme="dark"] .tire-cursor {
-    mix-blend-mode: screen;
-    border-color: rgba(236, 109, 53, .55)
 }
 
 /* FAQ */

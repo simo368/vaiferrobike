@@ -49,32 +49,6 @@
         panel.classList.remove('open');
     }));
 
-    /* ——— PEDAL METER (solo index) ——— */
-    const meterFill = document.querySelector('[data-meter-fill]');
-    const meterValue = document.querySelector('[data-meter-value]');
-    if (meterFill && meterValue) {
-        let pedalStep = 72;
-        setInterval(() => {
-            pedalStep = pedalStep >= 94 ? 68 : pedalStep + 2;
-            meterFill.style.width = pedalStep + '%';
-            meterValue.textContent = pedalStep + '%';
-        }, 1200);
-    }
-
-    /* ——— TIRE CURSOR ——— */
-    const tire = document.querySelector('.tire-cursor');
-    const finePointer = window.matchMedia('(pointer:fine)').matches;
-    if (finePointer && tire) {
-        window.addEventListener('mousemove', (e) => {
-            tire.style.opacity = '1';
-            tire.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-        }, { passive: true });
-        document.querySelectorAll('a, button, .service-card, .review-card').forEach(el => {
-            el.addEventListener('mouseenter', () => tire.style.scale = '1.8');
-            el.addEventListener('mouseleave', () => tire.style.scale = '1');
-        });
-    }
-
     /* ——— REVEAL ——— */
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
