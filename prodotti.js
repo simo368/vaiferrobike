@@ -210,16 +210,21 @@ function render() {
 
 function renderCard(bike) {
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
-  const hasImg = bike.Immagine && bike.Immagine.startsWith('http');
+  // Supporto multi-immagine: usa solo la prima come thumbnail della card
+  const imgs = bike.Immagine ? bike.Immagine.split('|').map(u => u.trim()).filter(u => u.startsWith('http')) : [];
+  const firstImg = imgs[0] || '';
+  const hasImg = !!firstImg;
   const isFeatured = bike.In_Evidenza?.toUpperCase() === 'SI';
   const waText = encodeURIComponent(`${CONFIG.WA_BASE_MSG}${bike.Nome} (${bike.Categoria}). Potete darmi informazioni?`);
+  const photoCount = imgs.length;
 
   return `
     <article class="product-card" tabindex="0" aria-label="${bike.Nome}">
       <div class="product-card__visual">
         ${hasImg
-      ? `<img src="${bike.Immagine}" alt="${bike.Nome}" loading="lazy">`
+      ? `<img src="${firstImg}" alt="${bike.Nome}" loading="lazy">`
       : `<div class="product-card__visual-fallback">${icon}</div>`}
+        ${photoCount > 1 ? `<span class="product-card__photo-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> ${photoCount}</span>` : ''}
         <span class="product-card__badge">${bike.Categoria}</span>
         ${isFeatured ? `<span class="product-card__featured" aria-label="In evidenza">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -266,19 +271,88 @@ function showDemoBanner() {
   if (banner) banner.hidden = false;
 }
 
+/* ─── CAROUSEL BUILDER ────────────────────────────────────── */
+function buildCarousel(images, bikeName, icon) {
+  if (images.length === 0) {
+    return `<div class="product-modal__visual-fallback">${icon}</div>`;
+  }
+  const slides = images.map(url =>
+    `<div class="carousel__slide"><img src="${url}" alt="${bikeName}" loading="lazy"></div>`
+  ).join('');
+  const dots = images.map((_, i) =>
+    `<button class="carousel__dot${i === 0 ? ' active' : ''}" aria-label="Foto ${i + 1}"></button>`
+  ).join('');
+  return `
+    <div class="carousel" data-count="${images.length}">
+      <div class="carousel__track">${slides}</div>
+      <button class="carousel__btn carousel__btn--prev" aria-label="Foto precedente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="carousel__btn carousel__btn--next" aria-label="Foto successiva">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="carousel__dots">${dots}</div>
+    </div>`;
+}
+
+function initCarousel(el) {
+  const count = parseInt(el.dataset.count) || 1;
+  if (count <= 1) return;
+  const track = el.querySelector('.carousel__track');
+  const dots = el.querySelectorAll('.carousel__dot');
+  const prevBtn = el.querySelector('.carousel__btn--prev');
+  const nextBtn = el.querySelector('.carousel__btn--next');
+  let cur = 0;
+
+  function goTo(index) {
+    cur = ((index % count) + count) % count;
+    track.style.transform = `translateX(-${cur * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+  }
+
+  prevBtn?.addEventListener('click', () => goTo(cur - 1));
+  nextBtn?.addEventListener('click', () => goTo(cur + 1));
+  dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+  // Swipe touch mobile
+  let tx = 0, ty = 0;
+  el.addEventListener('touchstart', e => {
+    tx = e.touches[0].clientX;
+    ty = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 44) {
+      goTo(dx < 0 ? cur + 1 : cur - 1);
+    }
+  }, { passive: true });
+
+  // Frecce tastiera quando il modal è aperto
+  el._keyHandler = (e) => {
+    if (e.key === 'ArrowLeft') goTo(cur - 1);
+    if (e.key === 'ArrowRight') goTo(cur + 1);
+  };
+  document.addEventListener('keydown', el._keyHandler);
+}
+
 /* ─── MODAL DETTAGLIO ─────────────────────────────────────── */
 function openModal(bike) {
   if (!modal) return;
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
-  const hasImg = bike.Immagine && bike.Immagine.startsWith('http');
+  const images = bike.Immagine
+    ? bike.Immagine.split('|').map(u => u.trim()).filter(u => u.startsWith('http'))
+    : [];
   const waText = encodeURIComponent(`${CONFIG.WA_BASE_MSG}${bike.Nome} (${bike.Categoria}). Vorrei sapere disponibilità e prezzo.`);
   const features = bike.Caratteristiche
     ? bike.Caratteristiche.split('|').map(f => f.trim()).filter(Boolean)
     : [];
 
-  modal.querySelector('.product-modal__visual').innerHTML = hasImg
-    ? `<img src="${bike.Immagine}" alt="${bike.Nome}">`
-    : `<div class="product-modal__visual-fallback">${icon}</div>`;
+  // Costruisce il carousel (o fallback se no immagini)
+  const visualEl = modal.querySelector('.product-modal__visual');
+  visualEl.innerHTML = buildCarousel(images, bike.Nome, icon);
+  const carouselEl = visualEl.querySelector('.carousel');
+  if (carouselEl && images.length > 1) initCarousel(carouselEl);
 
   modal.querySelector('.product-modal__meta').innerHTML = `
     <span class="product-card__badge" style="position:static">${bike.Categoria}</span>
@@ -314,6 +388,9 @@ function openModal(bike) {
 
 function closeModal() {
   if (!modal) return;
+  // Rimuove il listener tastiera del carousel attivo
+  const carouselEl = modal.querySelector('.carousel');
+  if (carouselEl?._keyHandler) document.removeEventListener('keydown', carouselEl._keyHandler);
   modal.classList.remove('open');
   document.body.style.overflow = '';
 }
