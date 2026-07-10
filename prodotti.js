@@ -211,7 +211,7 @@ function render() {
 function renderCard(bike) {
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
   // Supporto multi-immagine: usa solo la prima come thumbnail della card
-  const imgs = bike.Immagine ? bike.Immagine.split('|').map(u => u.trim()).filter(u => u.startsWith('http')) : [];
+  const imgs = bike.Immagine ? bike.Immagine.split(/[|,]/).map(u => u.trim()).filter(u => u.startsWith('http')) : [];
   const firstImg = imgs[0] || '';
   const hasImg = !!firstImg;
   const isFeatured = bike.In_Evidenza?.toUpperCase() === 'SI';
@@ -341,7 +341,7 @@ function openModal(bike) {
   if (!modal) return;
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
   const images = bike.Immagine
-    ? bike.Immagine.split('|').map(u => u.trim()).filter(u => u.startsWith('http'))
+    ? bike.Immagine.split(/[|,]/).map(u => u.trim()).filter(u => u.startsWith('http'))
     : [];
   const waText = encodeURIComponent(`${CONFIG.WA_BASE_MSG}${bike.Nome} (${bike.Categoria}). Vorrei sapere disponibilità e prezzo.`);
   const features = bike.Caratteristiche
