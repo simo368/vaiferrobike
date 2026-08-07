@@ -41,7 +41,6 @@
           <a href="officina.html">Officina</a>
           <a href="ebike.html">E-bike</a>
           <a href="prodotti.html">Le nostre bici</a>
-          <a href="occasioni.html">Occasioni</a>
           <a href="chi-siamo.html">Chi siamo</a>
           <a href="contatti.html">Contatti</a>
         </nav>
@@ -64,7 +63,6 @@
             <a href="officina.html">Officina</a>
             <a href="ebike.html">E-bike</a>
             <a href="prodotti.html">Le nostre bici</a>
-            <a href="occasioni.html">Usato e occasioni</a>
             <a href="chi-siamo.html">Chi siamo</a>
             <a href="contatti.html">Contatti</a>
           </nav>
@@ -78,11 +76,10 @@
           <div class="page-hero-kicker">
             <span class="chip">Umano · competente · locale</span>
           </div>
-          <h1 class="hero-title" style="font-size:clamp(2.4rem,6vw,5rem);">Un negozio <span class="accent">vero</span>.
-          </h1>
-          <p class="hero-lead">Il concept evita il classico sito "troppo corporate" e costruisce una presenza più
-            memorabile: grafica essenziale, richiami ciclistici, copy concreto e un tono che trasmette mestiere, non
-            slogan.</p>
+          <h1 class="hero-title" style="font-size:clamp(2.4rem,6vw,5rem);" id="cs-titolo-hero">Un negozio <span class="accent">vero</span>.</h1>
+          <p class="hero-lead" id="cs-sottotitolo">Da VAI FERRO BIKE puoi entrare per comprare una bici, scegliere un'e-bike
+            o sistemare un problema. Anche solo per un consiglio serio.
+            Questo è il negozio di quartiere che lavora bene.</p>
         </div>
       </section>
 
@@ -90,23 +87,27 @@
         <div class="container why-layout">
           <div class="reveal">
             <span class="eyebrow">Chi siamo</span>
-            <h2 class="section-title">Un negozio che deve sembrare vero anche online.</h2>
-            <p class="section-copy">Il concept evita il classico sito "troppo corporate" e costruisce una presenza più
-              memorabile: grafica essenziale, richiami ciclistici, copy concreto e un tono che trasmette mestiere, non
-              slogan.</p>
-            <div class="why-list" style="margin-top:2rem">
+            <h2 class="section-title">Un punto di riferimento locale per chi ama le bici.</h2>
+            <p class="section-copy" id="cs-testo-chi-siamo">
+              Da VAI FERRO BIKE puoi entrare per comprare una bici, scegliere un'e-bike,
+              sistemare un problema o anche solo per un consiglio serio. Siamo un negozio
+              vero, con persone reali, a Cavezzo.
+            </p>
+            <!-- Anno fondazione (se configurato nel foglio) -->
+            <p id="cs-anno-fondazione" class="eyebrow" style="margin-top:var(--space-4)"></p>
+
+            <!-- Valori: aggiornabili dal foglio -->
+            <div class="why-list" id="cs-valori-list" style="margin-top:2rem">
               <div class="why-item">
                 <div class="why-badge">✓</div>
                 <div><strong>Un punto di riferimento locale.</strong>
-                  <p>Da VAI FERRO BIKE puoi entrare per comprare una bici, scegliere un'e-bike o sistemare un problema.
-                  </p>
+                  <p>Da VAI FERRO BIKE puoi entrare per comprare una bici, scegliere un'e-bike o sistemare un problema.</p>
                 </div>
               </div>
               <div class="why-item">
                 <div class="why-badge">✓</div>
                 <div><strong>Apertura relazionale.</strong>
-                  <p>Anche solo per un consiglio serio: questa è la vera forza di un negozio di quartiere che lavora
-                    bene.</p>
+                  <p>Anche solo per un consiglio serio: questa è la vera forza di un negozio di quartiere che lavora bene.</p>
                 </div>
               </div>
               <div class="why-item">
@@ -118,16 +119,16 @@
             </div>
           </div>
 
+          <!-- Foto negozio (se configurata nel foglio) -->
           <div class="reveal">
-            <div class="review-card" style="margin-bottom:1rem">
-              <p>"Qui il messaggio chiave è semplice: da VAI FERRO BIKE puoi entrare per comprare una bici, per
-                scegliere un'e-bike, per sistemare un problema o anche solo per un consiglio serio."</p>
-              <footer>Direzione di brand · umano, competente, locale</footer>
+            <div id="cs-foto-negozio"
+              style="display:none;aspect-ratio:4/3;border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface-2)">
             </div>
-            <div class="review-wall">
+
+            <!-- Reviews come fallback quando non c'è foto -->
+            <div class="review-wall" id="cs-reviews-fallback">
               <article class="review-card">
-                <p>"Il titolare mi ha dato tanti consigli e mi ha aiutato a scegliere la bicicletta più adatta a me."
-                </p>
+                <p>"Il titolare mi ha dato tanti consigli e mi ha aiutato a scegliere la bicicletta più adatta a me."</p>
                 <footer>Recensione cliente · scelta assistita</footer>
               </article>
               <article class="review-card">
@@ -135,8 +136,7 @@
                 <footer>Recensione cliente · officina e prezzi</footer>
               </article>
               <article class="review-card">
-                <p>"Disponibilità e competenza non solo per le vendite ma anche per una semplice riparazione o un
-                  consiglio."</p>
+                <p>"Disponibilità e competenza non solo per le vendite ma anche per una semplice riparazione o un consiglio."</p>
                 <footer>Recensione cliente · fiducia quotidiana</footer>
               </article>
             </div>
@@ -144,13 +144,50 @@
         </div>
       </section>
 
+      <!-- SEZIONE TITOLARE (nascosta finché non configurata nel foglio) -->
+      <section id="cs-titolare" class="section" style="background:var(--color-surface-2)" hidden>
+        <div class="container">
+          <div class="why-layout">
+            <div class="reveal" style="display:flex;flex-direction:column;gap:var(--space-4)">
+              <!-- Foto titolare -->
+              <div id="cs-foto-titolare"
+                style="display:none;width:180px;height:180px;border-radius:var(--radius-full);overflow:hidden;background:var(--color-surface-dynamic)">
+              </div>
+              <div>
+                <h2 class="section-title" id="cs-nome-titolare" style="margin-bottom:.25rem"></h2>
+                <p class="eyebrow" id="cs-ruolo-titolare"></p>
+                <p class="section-copy" id="cs-bio-titolare" style="margin-top:var(--space-4)"></p>
+              </div>
+            </div>
+            <!-- Foto officina -->
+            <div class="reveal">
+              <div id="cs-foto-officina"
+                style="display:none;aspect-ratio:4/3;border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface-2)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MISSIONE -->
+      <section class="section">
+        <div class="container" style="text-align:center">
+          <span class="eyebrow reveal">La nostra filosofia</span>
+          <p class="section-title reveal" id="cs-testo-missione"
+            style="margin-inline:auto;max-width:32ch;text-align:center">
+            Persone che sanno davvero cosa stanno consigliando.
+          </p>
+        </div>
+      </section>
+
       <section class="section" style="background:var(--color-surface-2)">
         <div class="container" style="text-align:center">
           <span class="eyebrow reveal">Vieni a trovarci</span>
-          <h2 class="section-title reveal" style="margin-inline:auto;max-width:20ch">Siamo in Via Volturno 86 a Cavezzo.
-          </h2>
-          <p class="section-copy reveal" style="margin-inline:auto;text-align:center">Aperto da lunedì a sabato,
-            08:30–12:30 / 15:30–19:30. Domenica chiuso.</p>
+          <h2 class="section-title reveal" style="margin-inline:auto;max-width:20ch">Siamo in Via Volturno 86 a Cavezzo.</h2>
+          <p class="section-copy reveal" style="margin-inline:auto;text-align:center">
+            <span data-vaifb="Orari">Aperto da lunedì a sabato, 08:30–12:30 / 15:30–19:30</span>.
+            <span data-vaifb="Orari_Domenica">Domenica chiuso</span>.
+          </p>
           <div class="btn-row reveal" style="justify-content:center;margin-top:2rem">
             <a class="btn btn-primary"
               href="https://wa.me/393000000000?text=Ciao%20VAI%20FERRO%20BIKE%2C%20vorrei%20avere%20informazioni."
@@ -176,7 +213,7 @@
             </span>
             <span class="brand-name"><strong>VAI FERRO BIKE</strong><span>Negozio bici · Cavezzo</span></span>
           </div>
-          <p>Vendita biciclette, e-bike, officina, accessori e occasioni a Cavezzo, in provincia di Modena.</p>
+          <p>Vendita biciclette, e-bike, officina, accessori a Cavezzo, in provincia di Modena.</p>
         </div>
         <div>
           <strong>Link rapidi</strong>
@@ -184,7 +221,6 @@
             <a href="servizi.html">Servizi</a>
             <a href="officina.html">Officina</a>
             <a href="ebike.html">E-bike</a>
-            <a href="occasioni.html">Occasioni</a>
             <a href="chi-siamo.html">Chi siamo</a>
             <a href="contatti.html">Contatti</a>
           </div>
@@ -205,7 +241,9 @@
         target="_blank" rel="noopener noreferrer">WhatsApp</a>
     </div>
   </div>
+  <script src="impostazioni.js"></script>
   <script src="main.js"></script>
+  <script src="chi-siamo.js"></script>
 </body>
 
 </html>
