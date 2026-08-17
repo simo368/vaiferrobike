@@ -83,7 +83,8 @@ async function loadImpostazioni() {
       const url = `https://docs.google.com/spreadsheets/d/${IMPOSTAZIONI_SHEET_ID}/export?format=csv&gid=${GID_IMPOSTAZIONI}`;
       const res = await fetch(url);
       if (!res.ok) return;
-      text = await res.text();
+      const buffer = await res.arrayBuffer();
+      text = new TextDecoder('utf-8').decode(buffer);
       sessionStorage.setItem(cacheKey, text);
     }
     
@@ -162,6 +163,35 @@ function applyConfig() {
       ldScript.textContent = JSON.stringify(ld);
     } catch (_) { /* JSON-LD non valido, skip */ }
   }
+
+  /* Aggiorna immagini globali (data-vaifb-img) */
+  document.querySelectorAll('[data-vaifb-img]').forEach(el => {
+    const key = el.dataset.vaifbImg;
+    const url = window.VAIFB[key];
+    if (url && url.trim() !== '') {
+      const imgUrl = vaifbDriveUrl(url);
+      el.innerHTML = `<img src="${imgUrl}" alt="${key}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:var(--r-xl);display:block" onerror="this.parentElement.style.display='none'">`;
+      el.classList.remove('editorial-visual__ph');
+      el.style.display = 'block';
+      el.style.padding = '0';
+      el.style.border = 'none';
+      el.style.width = '100%';
+      el.style.height = '100%';
+    }
+  });
+}
+
+function vaifbDriveUrl(url) {
+  if (!url || !url.includes('drive.google.com')) return url;
+  let fileId = null;
+  const m = url.match(/\/file\/d\/([^/?#&]+)/);
+  if (m) fileId = m[1];
+  if (!fileId) {
+    const o = url.match(/[?&]id=([^&]+)/);
+    if (o) fileId = o[1];
+  }
+  if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
+  return url;
 }
 
 /* ─── ESPORTA applyConfig per richiamo esterno (es. prodotti.js) */

@@ -13,7 +13,7 @@
    COLONNE SUPPORTATE NEL FOGLIO:
    Nome | Marca | Categoria | Descrizione_Breve | Descrizione_Completa
    Prezzo | Disponibile | In_Evidenza | Immagine | Caratteristiche
-   Taglia | Colore | Anno | Ordinamento | Note
+   Taglia | Colore | Colore_Immagini | Anno | Ordinamento | Note
 
    FORMATO IMMAGINE (colonna "Immagine"):
    - Link Google Drive (si convertono automaticamente):
@@ -23,6 +23,11 @@
        https://... qualsiasi URL diretto a un'immagine
    - Più immagini separate da | (pipe):
        https://drive.google.com/file/d/ABC/view|https://drive.google.com/file/d/XYZ/view
+
+   VARIANTI COLORE (colonna "Colore_Immagini", opzionale):
+   - Associa immagini specifiche ai colori definiti nella colonna "Colore".
+   - Formato: NomeColore: url1,url2 | AltroColore: url3
+       es: Nero: https://.../img1.jpg,https://.../img2.jpg | Blu: https://.../img3.jpg
 */
 
 const CONFIG = {
@@ -33,8 +38,8 @@ const CONFIG = {
 
 /* ─── DATI DEMO (usati finché SHEET_ID non è configurato) ──── */
 const DEMO_BIKES = [
-  { Nome: 'Trek Marlin 5', Marca: 'Trek', Categoria: 'MTB', Descrizione_Breve: 'Hardtail versatile per sentieri e uso misto. Forcella ammortizzata, freni a disco.', Descrizione_Completa: 'La Trek Marlin 5 è la scelta ideale per chi vuole avvicinarsi al mountain bike senza compromessi. Forcella SR Suntour XCT da 100mm, freni idraulici Tektro, cambio Shimano Altus 21V. Ruote 29" per un rotolamento fluido e veloce.', Prezzo: 'da €799', Disponibile: 'SI', In_Evidenza: 'SI', Immagine: '', Caratteristiche: 'Forcella 100mm|Freni a disco idraulici|Cambio Shimano 21V|Ruote 29"', Taglia: 'S,M,L,XL', Colore: 'Nero|Blu', Anno: '2024', Ordinamento: '10', Note: '' },
-  { Nome: 'Bianchi E-Omnia T', Marca: 'Bianchi', Categoria: 'E-Bike', Descrizione_Breve: 'E-bike da trekking con motore Bosch. Autonomia fino a 120km, display integrato.', Descrizione_Completa: 'La Bianchi E-Omnia T unisce il fascino del brand storico alla tecnologia moderna. Motore Bosch Active Line Plus, batteria 500Wh, display Purion. Perfetta per pendolari e appassionati di cicloturismo.', Prezzo: 'da €2.499', Disponibile: 'SI', In_Evidenza: 'SI', Immagine: '', Caratteristiche: 'Motore Bosch|Batteria 500Wh|Autonomia ~120km|Display Purion', Taglia: 'S,M,L', Colore: 'Celeste|Nero', Anno: '2024', Ordinamento: '20', Note: 'Disponibile in più taglie' },
+  { Nome: 'Trek Marlin 5', Marca: 'Trek', Categoria: 'MTB', Descrizione_Breve: 'Hardtail versatile per sentieri e uso misto. Forcella ammortizzata, freni a disco.', Descrizione_Completa: 'La Trek Marlin 5 è la scelta ideale per chi vuole avvicinarsi al mountain bike senza compromessi. Forcella SR Suntour XCT da 100mm, freni idraulici Tektro, cambio Shimano Altus 21V. Ruote 29" per un rotolamento fluido e veloce.', Prezzo: 'da €799', Disponibile: 'SI', In_Evidenza: 'SI', Immagine: 'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?auto=format&fit=crop&w=1200&q=80', Caratteristiche: 'Forcella 100mm|Freni a disco idraulici|Cambio Shimano 21V|Ruote 29"', Taglia: 'S,M,L,XL', Colore: 'Nero|Blu', Colore_Immagini: 'Nero: https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?auto=format&fit=crop&w=1200&q=80 | Blu: https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=1200&q=80', Anno: '2024', Ordinamento: '10', Note: '' },
+  { Nome: 'Bianchi E-Omnia T', Marca: 'Bianchi', Categoria: 'E-Bike', Descrizione_Breve: 'E-bike da trekking con motore Bosch. Autonomia fino a 120km, display integrato.', Descrizione_Completa: 'La Bianchi E-Omnia T unisce il fascino del brand storico alla tecnologia moderna. Motore Bosch Active Line Plus, batteria 500Wh, display Purion. Perfetta per pendolari e appassionati di cicloturismo.', Prezzo: 'da €2.499', Disponibile: 'SI', In_Evidenza: 'SI', Immagine: '', Caratteristiche: 'Motore Bosch|Batteria 500Wh|Autonomia ~120km|Display Purion', Taglia: 'S,M,L', Colore: 'Celeste|Nero', Colore_Immagini: '', Anno: '2024', Ordinamento: '20', Note: 'Disponibile in più taglie' },
   { Nome: 'Cube Nature', Marca: 'Cube', Categoria: 'Trekking', Descrizione_Breve: 'Bici da trekking polivalente, ideale per percorsi misti e lunghe uscite su strada e sterrato.', Descrizione_Completa: 'La Cube Nature è progettata per chi ama pedalare senza limiti. Telaio in alluminio leggero, forcella rigida, pneumatici 700x42c per aderenza su tutti i fondi.', Prezzo: 'da €699', Disponibile: 'SI', In_Evidenza: 'NO', Immagine: '', Caratteristiche: 'Telaio alluminio|Pneumatici 700x42c|Cambio Shimano 24V|Portapacchi incluso', Taglia: 'XS,S,M,L', Colore: 'Grigio|Verde', Anno: '2024', Ordinamento: '30', Note: '' },
   { Nome: 'Cannondale Quick 4', Marca: 'Cannondale', Categoria: 'City Bike', Descrizione_Breve: 'Bici urbana veloce e leggera. Per commuter esigenti che non vogliono rinunciare alle prestazioni.', Descrizione_Completa: 'La Cannondale Quick 4 è la scelta dei professionisti urbani. Telaio SmartForm C3, manubrio flat bar, freni a disco meccanici. Agile nel traffico, veloce in rettilineo.', Prezzo: 'da €649', Disponibile: 'SI', In_Evidenza: 'NO', Immagine: '', Caratteristiche: 'Telaio SmartForm C3|Freni a disco meccanici|Ruote 700c|Peso 10.8kg', Taglia: 'XS,S,M,L,XL', Colore: 'Nero|Bianco', Anno: '2023', Ordinamento: '40', Note: '' },
   { Nome: 'Trek Checkpoint ALR 5', Marca: 'Trek', Categoria: 'Gravel', Descrizione_Breve: 'Gravel bike da avventura. Perfetta per lunghe uscite su strade bianche e percorsi misti.', Descrizione_Completa: 'La Trek Checkpoint ALR 5 è costruita per chi vuole esplorare. Telaio Alpha Platinum Aluminium, forcella IsoSpeed, compatibilità con pneumatici fino a 45mm. Portapacchi e borse laterali integrabili.', Prezzo: 'da €1.299', Disponibile: 'SI', In_Evidenza: 'SI', Immagine: '', Caratteristiche: 'Forcella IsoSpeed|Pneumatici 40mm|Cambio Shimano GRX|Attacchi borse', Taglia: 'XS,S,M,L,XL', Colore: 'Verde|Grigio', Anno: '2024', Ordinamento: '50', Note: '' },
@@ -88,35 +93,56 @@ const modal = document.getElementById('productModal');
    • https://drive.google.com/uc?id=FILE_ID  (già diretto)
    Tutti diventano: https://drive.google.com/uc?export=view&id=FILE_ID
 */
-function convertDriveUrl(url) {
+function convertDriveUrl(url, size = 'w1200') {
   if (!url || !url.includes('drive.google.com')) return url;
 
-  // Già in formato diretto
-  if (url.includes('uc?') && url.includes('id=')) {
-    return url.replace(/export=[^&]+/, 'export=view');
-  }
+  let fileId = null;
 
   // https://drive.google.com/file/d/FILE_ID/...
   const fileMatch = url.match(/\/file\/d\/([^/?#&]+)/);
-  if (fileMatch) {
-    return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
-  }
+  if (fileMatch) fileId = fileMatch[1];
 
   // https://drive.google.com/open?id=FILE_ID
-  const openMatch = url.match(/[?&]id=([^&]+)/);
-  if (openMatch) {
-    return `https://drive.google.com/uc?export=view&id=${openMatch[1]}`;
+  // https://drive.google.com/uc?id=FILE_ID
+  // https://drive.google.com/uc?export=view&id=FILE_ID
+  if (!fileId) {
+    const idMatch = url.match(/[?&]id=([^&]+)/);
+    if (idMatch) fileId = idMatch[1];
   }
 
-  return url; // non riconosciuto → restituisce inalterato
+  if (fileId) {
+    // Endpoint non ufficiale di Google (usato internamente per le anteprime),
+    // garantisce tempi di caricamento più rapidi aggirando i redirect.
+    // Nota: essendo non ufficiale, potenzialmente soggetto a cambiamenti futuri.
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+
+  return url; // formato non riconosciuto → restituisce inalterato
 }
 
 /* ─── PARSE IMMAGINI (Drive + diretti, multi) ─────────────── */
-function parseImages(raw) {
+function parseImages(raw, size = 'w1200') {
   if (!raw || !raw.trim()) return [];
   return raw.split(/[|,]/)
-    .map(u => convertDriveUrl(u.trim()))
+    .map(u => convertDriveUrl(u.trim(), size))
     .filter(u => u.startsWith('http'));
+}
+
+/* ─── PARSE COLOR IMAGES ──────────────────────────────────── */
+function parseColorImages(raw, size = 'w1200') {
+  if (!raw || !raw.trim()) return null;
+  const result = {};
+  raw.split('|').forEach(part => {
+    const splitIdx = part.indexOf(':');
+    if (splitIdx > -1) {
+      const color = part.substring(0, splitIdx).trim();
+      const urls = part.substring(splitIdx + 1).trim();
+      if (color && urls) {
+        result[color] = parseImages(urls, size);
+      }
+    }
+  });
+  return Object.keys(result).length > 0 ? result : null;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -168,7 +194,8 @@ async function fetchFromSheet() {
   const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/export?format=csv&gid=0`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
+  const buffer = await res.arrayBuffer();
+  const text = new TextDecoder('utf-8').decode(buffer);
   sessionStorage.setItem(cacheKey, text);
   return text;
 }
@@ -230,6 +257,17 @@ async function loadBikes() {
     allBikes = DEMO_BIKES.filter(b => isTrue(b.Disponibile));
     showDemoBanner();
   }
+
+  // Pre-filtra tramite URL (es. ?categoria=E-Bike)
+  const params = new URLSearchParams(window.location.search);
+  const catParam = params.get('categoria');
+  if (catParam) {
+    const isValid = allBikes.some(b => b.Categoria === catParam);
+    if (isValid) {
+      activeCategory = catParam;
+    }
+  }
+
   buildFilters();
   render();
 }
@@ -337,82 +375,80 @@ function render() {
 
   gridEl.innerHTML = sorted.map((bike, i) => renderCard(bike, i)).join('');
   gridEl.querySelectorAll('.product-card').forEach((card, i) => {
-    card.addEventListener('click', () => openModal(sorted[i]));
-    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openModal(sorted[i]); });
-    card.querySelector('.product-card__cta')?.addEventListener('click', e => e.stopPropagation());
+    const visual = card.querySelector('.product-card__visual');
+    const btnDettagli = card.querySelector('.btn-vedi-dettagli');
+    
+    // Assegna il click solo alla foto e al bottone
+    [visual, btnDettagli].forEach(el => {
+      if (!el) return;
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal(sorted[i]);
+      });
+      el.addEventListener('keydown', e => { 
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          openModal(sorted[i]); 
+        }
+      });
+    });
   });
 }
 
-/* ─── RENDER CARD ─────────────────────────────────────────── */
+/* ─── RENDER CARD v3 ──────────────────────────────────────── */
 function renderCard(bike) {
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
-  const imgs = parseImages(bike.Immagine);
+  const imgs = parseImages(bike.Immagine, 'w400');
   const firstImg = imgs[0] || '';
   const hasImg = !!firstImg;
   const isFeatured = isTrue(bike.In_Evidenza);
   const waText = encodeURIComponent(`${CONFIG.WA_BASE_MSG}${bike.Nome} (${bike.Categoria}). Potete darmi informazioni?`);
-  const photoCount = imgs.length;
-
-  // Taglie (max 3 visibili in card, poi "+N")
-  const sizes = bike.Taglia ? bike.Taglia.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const sizesHtml = sizes.length
-    ? `<div class="product-card__sizes">${
-        sizes.slice(0, 3).map(s => `<span class="size-chip">${s}</span>`).join('')
-      }${sizes.length > 3 ? `<span class="size-chip size-chip--more">+${sizes.length - 3}</span>` : ''}
-      </div>`
-    : '';
-
-  // Badge categoria con colore speciale per Usato
-  const categoryClass = bike.Categoria === 'Usato' ? 'product-card__badge product-card__badge--usato' : 'product-card__badge';
 
   return `
-    <article class="product-card" tabindex="0" aria-label="${bike.Nome}">
-      <div class="product-card__visual">
+    <article class="product-card" aria-label="${escapeHtml(bike.Nome)}">
+      <div class="product-card__visual" tabindex="0" role="button" aria-label="Ingrandisci foto di ${escapeHtml(bike.Nome)}">
         ${hasImg
-    ? `<img src="${firstImg}" alt="${escapeHtml(bike.Nome)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-           <div class="product-card__visual-fallback" style="display:none">${icon}</div>`
-    : `<div class="product-card__visual-fallback">${icon}</div>`}
-        ${photoCount > 1 ? `<span class="product-card__photo-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> ${photoCount}</span>` : ''}
-        <span class="${categoryClass}">${bike.Categoria}</span>
-        ${isFeatured ? `<span class="product-card__featured" aria-label="In evidenza">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </span>` : ''}
-        ${bike.Anno ? `<span class="product-card__year">${bike.Anno}</span>` : ''}
+          ? `<img class="product-card__img" src="${firstImg}" alt="${escapeHtml(bike.Nome)}" loading="lazy" decoding="async"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+             <div class="product-card__icon" style="display:none">${icon}</div>`
+          : `<div class="product-card__icon">${icon}</div>`}
+        <div class="product-card__badges">
+          ${isFeatured ? '<span class="badge-gold" style="font-size:11px">★ In evidenza</span>' : ''}
+          ${bike.Categoria === 'Usato' ? '<span class="badge-accent" style="font-size:11px">Usato</span>' : ''}
+        </div>
       </div>
       <div class="product-card__body">
-        ${bike.Marca ? `<p class="product-card__brand">${escapeHtml(bike.Marca)}</p>` : ''}
+        <div class="product-card__meta">
+          <span class="product-card__cat">${escapeHtml(bike.Categoria)}</span>
+          ${bike.Marca ? `<span class="product-card__brand">${escapeHtml(bike.Marca)}</span>` : ''}
+        </div>
         <h3 class="product-card__name">${escapeHtml(bike.Nome)}</h3>
         <p class="product-card__desc">${escapeHtml(bike.Descrizione_Breve || '')}</p>
-        ${sizesHtml}
         <div class="product-card__footer">
           <span class="product-card__price">${escapeHtml(formatPrezzo(bike.Prezzo))}</span>
-          <a class="product-card__cta"
-            href="https://wa.me/${CONFIG.WA_NUMBER}?text=${waText}"
-            target="_blank" rel="noopener noreferrer"
-            aria-label="Chiedi info su ${escapeHtml(bike.Nome)} via WhatsApp">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.037.507 3.956 1.395 5.64L.057 23.943l6.303-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.893 0-3.662-.524-5.172-1.434l-.37-.22-3.74.982.999-3.648-.241-.374A9.957 9.957 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-            Chiedi info
-          </a>
+          <button type="button" class="btn btn-sm btn-primary btn-vedi-dettagli" aria-label="Vedi dettagli di ${escapeHtml(bike.Nome)}">
+            Vedi dettagli
+          </button>
         </div>
       </div>
     </article>`;
 }
 
-/* ─── SKELETON LOADER ─────────────────────────────────────── */
+/* ─── SKELETON LOADER v3 ──────────────────────────────────── */
 function showSkeleton() {
   if (!gridEl) return;
-  gridEl.className = 'skeleton-grid';
+  gridEl.className = 'product-grid';
   gridEl.innerHTML = Array(8).fill(`
-    <div class="skeleton-card">
-      <div class="skeleton-card__visual"></div>
-      <div class="skeleton-card__body">
-        <div class="skeleton-line short"></div>
-        <div class="skeleton-line title"></div>
-        <div class="skeleton-line long"></div>
-        <div class="skeleton-line medium"></div>
+    <div class="product-skeleton">
+      <div class="product-skeleton__visual"></div>
+      <div class="product-skeleton__body">
+        <div class="product-skeleton__line short"></div>
+        <div class="product-skeleton__line wide"></div>
+        <div class="product-skeleton__line mid"></div>
+        <div class="product-skeleton__line short"></div>
       </div>
     </div>`).join('');
-  setTimeout(() => { if (gridEl) gridEl.className = 'product-grid'; }, 100);
 }
 
 /* ─── BANNER DEMO ─────────────────────────────────────────── */
@@ -437,8 +473,9 @@ function buildCarousel(images, bikeName, icon) {
   }
   const slides = images.map(url =>
     `<div class="carousel__slide">
-      <img src="${url}" alt="${escapeHtml(bikeName)}" loading="lazy"
-        onerror="this.parentElement.style.background='var(--color-surface-raised)';this.style.display='none'">
+      <div class="carousel__bg" style="background-image: url('${url}')"></div>
+      <img src="${url}" alt="${escapeHtml(bikeName)}" loading="lazy" decoding="async"
+        onerror="this.parentElement.style.background='var(--color-surface-raised)';this.style.display='none';if(this.previousElementSibling)this.previousElementSibling.style.display='none';">
     </div>`
   ).join('');
   const dots = images.map((_, i) =>
@@ -496,7 +533,9 @@ function initCarousel(el) {
 function openModal(bike) {
   if (!modal) return;
   const icon = CATEGORY_ICONS[bike.Categoria] || DEFAULT_ICON;
-  const images = parseImages(bike.Immagine);
+  const images = parseImages(bike.Immagine, 'w800');
+  const colorImagesMap = parseColorImages(bike.Colore_Immagini, 'w800');
+  
   const waText = encodeURIComponent(`${CONFIG.WA_BASE_MSG}${bike.Nome} (${bike.Categoria}). Vorrei sapere disponibilità e prezzo.`);
   const features = bike.Caratteristiche
     ? bike.Caratteristiche.split('|').map(f => f.trim()).filter(Boolean)
@@ -538,7 +577,13 @@ function openModal(bike) {
   const infoChips = [];
   if (bike.Colore) {
     bike.Colore.split('|').forEach(c => {
-      infoChips.push(`<span class="info-chip">🎨 ${escapeHtml(c.trim())}</span>`);
+      const colorName = c.trim();
+      if (colorImagesMap && colorImagesMap[colorName]) {
+        // Render come swatch cliccabile
+        infoChips.push(`<button type="button" class="info-chip color-swatch" data-color="${escapeHtml(colorName)}" style="cursor:pointer; border:1px solid var(--border); transition: border-color var(--t-fast) ease">🎨 ${escapeHtml(colorName)}</button>`);
+      } else {
+        infoChips.push(`<span class="info-chip">🎨 ${escapeHtml(colorName)}</span>`);
+      }
     });
   }
   if (infoChips.length) {
@@ -546,6 +591,30 @@ function openModal(bike) {
     infoEl.innerHTML = `<div class="info-chips-list">${infoChips.join('')}</div>`;
   } else {
     infoEl.hidden = true;
+  }
+
+  // Aggiunta Event Listener per i colori cliccabili
+  const swatches = modal.querySelectorAll('.color-swatch');
+  if (swatches.length) {
+    swatches.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const color = e.currentTarget.dataset.color;
+        const newImages = colorImagesMap[color];
+        if (newImages) {
+          swatches.forEach(s => s.style.borderColor = 'var(--border)');
+          e.currentTarget.style.borderColor = 'var(--accent)';
+          
+          visualEl.style.transition = 'opacity var(--t-mid) var(--ease-out)';
+          visualEl.style.opacity = '0';
+          setTimeout(() => {
+            visualEl.innerHTML = buildCarousel(newImages, bike.Nome, icon);
+            const newCarousel = visualEl.querySelector('.carousel');
+            if (newCarousel && newImages.length > 1) initCarousel(newCarousel);
+            visualEl.style.opacity = '1';
+          }, 350); // attende la transizione
+        }
+      });
+    });
   }
 
   // Caratteristiche
@@ -568,7 +637,12 @@ function openModal(bike) {
   const waTarget = window.VAIFB?.WA_Vendite || window.VAIFB?.WA_Officina || CONFIG.WA_NUMBER;
   const telTarget = (window.VAIFB?.Tel_Vendite || window.VAIFB?.Tel_Officina || CONFIG.WA_NUMBER).replace(/\s/g, '');
   
-  modal.querySelector('.modal-wa-btn').href = `https://wa.me/${waTarget}?text=${waText}`;
+  const waBtn = modal.querySelector('.modal-wa-btn');
+  waBtn.href = `https://wa.me/${waTarget}?text=${waText}`;
+  if (!waBtn.querySelector('svg')) {
+    waBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg> ${waBtn.textContent}`;
+  }
+
   modal.querySelector('.modal-call-btn').href = `tel:${telTarget.startsWith('+') ? telTarget : '+' + telTarget}`;
 
   modal.classList.add('open');
@@ -587,7 +661,56 @@ function closeModal() {
 /* ─── EVENT LISTENERS ─────────────────────────────────────── */
 modal?.querySelector('.product-modal__close')?.addEventListener('click', closeModal);
 modal?.querySelector('.product-modal__backdrop')?.addEventListener('click', closeModal);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+document.addEventListener('keydown', e => { 
+  if (e.key === 'Escape') {
+    if (document.querySelector('.image-lightbox.open')) {
+      closeLightbox();
+    } else {
+      closeModal();
+    }
+  } 
+});
+
+let lightboxEl = null;
+
+function openLightbox(src) {
+  if (!lightboxEl) {
+    lightboxEl = document.createElement('div');
+    lightboxEl.className = 'image-lightbox';
+    lightboxEl.setAttribute('role', 'dialog');
+    lightboxEl.setAttribute('aria-modal', 'true');
+    lightboxEl.innerHTML = `
+      <button class="image-lightbox__close" aria-label="Chiudi ingrandimento">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <img src="" alt="Immagine ingrandita">
+    `;
+    document.body.appendChild(lightboxEl);
+    
+    lightboxEl.addEventListener('click', e => {
+      if (e.target === lightboxEl || e.target.closest('.image-lightbox__close') || e.target.tagName === 'IMG') {
+        closeLightbox();
+      }
+    });
+  }
+  
+  lightboxEl.querySelector('img').src = src;
+  lightboxEl.classList.add('open');
+}
+
+function closeLightbox() {
+  if (lightboxEl) {
+    lightboxEl.classList.remove('open');
+  }
+}
+
+document.addEventListener('click', e => {
+  const slideImg = e.target.closest('.carousel__slide img');
+  if (slideImg && slideImg.src) {
+    openLightbox(slideImg.src);
+  }
+});
 
 sortSelect?.addEventListener('change', e => {
   activeSort = e.target.value;

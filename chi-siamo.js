@@ -19,6 +19,10 @@
       Ruolo_Titolare      | Titolare e meccanico
       Bio_Titolare        | Testo breve sul titolare...
       Foto_Titolare       | https://drive.google.com/file/d/... (link Drive)
+      Nome_Socio          | Luca Bianchi
+      Ruolo_Socio         | Socio e tecnico e-bike
+      Bio_Socio           | Testo breve sul socio...
+      Foto_Socio          | https://drive.google.com/file/d/... (link Drive)
       Foto_Negozio        | https://drive.google.com/file/d/... (link Drive)
       Foto_Officina       | https://drive.google.com/file/d/... (link Drive)
       Anno_Fondazione     | 2015
@@ -30,6 +34,8 @@
    4. Clicca sul tab "ChiSiamo" in basso su Google Sheets
    5. Guarda l'indirizzo (URL) in alto e copia il numero dopo "gid="
    6. Incollalo in GID_CHI_SIAMO qui sotto.
+   NOTA: i campi Socio (Nome_Socio, Ruolo_Socio, Bio_Socio, Foto_Socio)
+   sono opzionali: se non compilati il blocco socio rimane nascosto.
 */
 
 const CS_SHEET_ID = (() => {
@@ -46,11 +52,14 @@ function csEsc(str) {
 
 function csDriveUrl(url) {
   if (!url || !url.includes('drive.google.com')) return url;
-  if (url.includes('uc?') && url.includes('id=')) return url.replace(/export=[^&]+/, 'export=view');
+  let fileId = null;
   const m = url.match(/\/file\/d\/([^/?#&]+)/);
-  if (m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
-  const o = url.match(/[?&]id=([^&]+)/);
-  if (o) return `https://drive.google.com/uc?export=view&id=${o[1]}`;
+  if (m) fileId = m[1];
+  if (!fileId) {
+    const o = url.match(/[?&]id=([^&]+)/);
+    if (o) fileId = o[1];
+  }
+  if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
   return url;
 }
 
@@ -72,7 +81,8 @@ async function loadChiSiamo() {
     const url = `https://docs.google.com/spreadsheets/d/${CS_SHEET_ID}/export?format=csv&gid=${GID_CHI_SIAMO}`;
     const res = await fetch(url);
     if (!res.ok) return; // Foglio non trovato o non configurato: pagina resta statica
-    const text = await res.text();
+    const buffer = await res.arrayBuffer();
+    const text = new TextDecoder('utf-8').decode(buffer);
     const lines = text.replace(/^\uFEFF/, '').trim().split('\n');
     const data = {};
     lines.slice(1).forEach(line => {
@@ -127,6 +137,21 @@ function renderChiSiamo(d) {
     setEl('cs-bio-titolare', d.Bio_Titolare);
   }
 
+  /* Scheda socio (opzionale — visibile solo se Nome_Socio o Foto_Socio sono compilati) */
+  const socioEl = document.getElementById('cs-socio');
+  if (socioEl && (d.Nome_Socio || d.Foto_Socio)) {
+    socioEl.hidden = false;
+    if (d.Foto_Socio) {
+      renderPhoto('cs-foto-socio', csDriveUrl(d.Foto_Socio), d.Nome_Socio || 'Il socio');
+    }
+    setEl('cs-nome-socio', d.Nome_Socio);
+    setEl('cs-ruolo-socio', d.Ruolo_Socio);
+    setEl('cs-bio-socio', d.Bio_Socio);
+    /* Quando il socio è visibile, attiva il grid a 2 colonne nel wrapper */
+    const gridEl = document.getElementById('cs-team-grid');
+    if (gridEl) gridEl.classList.add('cs-team-grid--duo');
+  }
+
   /* Valori del negozio (fino a 4) */
   const valori = [d.Valore_1, d.Valore_2, d.Valore_3, d.Valore_4].filter(Boolean);
   if (valori.length) {
@@ -151,7 +176,7 @@ function renderPhoto(containerId, src, alt) {
   const el = document.getElementById(containerId);
   if (!el || !src) return;
   el.innerHTML = `<img src="${src}" alt="${csEsc(alt)}" loading="lazy"
-    style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg)"
+    style="width:100%;height:100%;object-fit:cover;border-radius:var(--r-xl);display:block"
     onerror="this.parentElement.style.display='none'">`;
   el.style.display = 'block';
 }
